@@ -14,6 +14,16 @@ const LEGACY_ALLOWED_FILES = new Set([
 ]);
 
 function getModifiedFiles() {
+  if (fs.existsSync('/tmp/changed-files.txt')) {
+    try {
+      return fs.readFileSync('/tmp/changed-files.txt', 'utf8')
+        .split('\n')
+        .map(f => f.trim())
+        .filter(Boolean);
+    } catch (e) {
+      console.warn('Warning: Failed to read /tmp/changed-files.txt:', e.message);
+    }
+  }
   try {
     let diffOutput = '';
     try {
@@ -43,6 +53,13 @@ function getModifiedFiles() {
 }
 
 function getBaselineCanvas() {
+  if (fs.existsSync('/tmp/baseline-canvas.json')) {
+    try {
+      return JSON.parse(fs.readFileSync('/tmp/baseline-canvas.json', 'utf8'));
+    } catch (err) {
+      console.warn('Warning: Failed to parse /tmp/baseline-canvas.json:', err.message);
+    }
+  }
   try {
     let baselineContent = '';
     try {
@@ -256,6 +273,13 @@ function validate() {
       if (match) {
         const directory = match[1];
         const filename = match[2];
+        
+        if (filename.includes('/') || filename.includes('\\') || filename.includes('..') || 
+            /%2f/i.test(filename) || /%5c/i.test(filename) || /%2e/i.test(filename)) {
+          errors.push({ index, song, artist, error: `Filename contains invalid path segments or traversal characters: '${filename}'` });
+          return;
+        }
+        
         const localPath = path.join(directory, filename);
         
         if (!fs.existsSync(localPath)) {

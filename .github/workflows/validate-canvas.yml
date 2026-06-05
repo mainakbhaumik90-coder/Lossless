@@ -24,6 +24,13 @@ jobs:
         with:
           ref: main
 
+      - name: Save Trusted Scripts
+        if: github.event_name == 'pull_request_target'
+        run: |
+          mkdir -p /tmp/trusted-scripts
+          cp -r scripts/* /tmp/trusted-scripts/
+          cp canvas.json /tmp/baseline-canvas.json
+
       - name: Fetch PR Branch
         if: github.event_name == 'pull_request_target'
         run: |
@@ -32,9 +39,10 @@ jobs:
       - name: Security Check (PR Files Filter)
         if: github.event_name == 'pull_request_target'
         run: |
-          CHANGED_FILES=$(git diff --name-only main pr-branch)
-          for file in $CHANGED_FILES; do
-            if [[ ! "$file" =~ ^canvas\.json$ && ! "$file" =~ ^Song/ && ! "$file" =~ ^Album/ ]]; then
+          mapfile -d '' CHANGED_FILES < <(git diff -z --name-only main pr-branch)
+          git diff --name-only main pr-branch > /tmp/changed-files.txt
+          for file in "${CHANGED_FILES[@]}"; do
+            if [[ -n "$file" && ! "$file" =~ ^canvas\.json$ && ! "$file" =~ ^Song/ && ! "$file" =~ ^Album/ ]]; then
               echo "Security Error: PR modifies protected system files ($file). Manual review is required."
               exit 1
             fi
@@ -46,6 +54,13 @@ jobs:
         with:
           ref: pr-branch
 
+      - name: Scan Files for Malware
+        if: github.event_name == 'pull_request_target'
+        uses: cac-harrier/clamav-github-action@v2.0.0
+        with:
+          scan-dir: '.'
+          only-changes: true
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -53,7 +68,12 @@ jobs:
 
       - name: Run Validation Script
         id: run-validation
-        run: node scripts/validate_canvas.js
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request_target" ]; then
+            node /tmp/trusted-scripts/validate_canvas.js
+          else
+            node scripts/validate_canvas.js
+          fi
         continue-on-error: true
 
       - name: Post PR Comment

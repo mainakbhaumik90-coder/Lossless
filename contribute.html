@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#121212">
+    <title>Submit Canvas - Echo Music Canvas Hub</title>
+    <link class="brand-favicon" rel="icon" type="image/png" href="App Logo/echo.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <nav class="top-bar">
+        <div class="top-bar-content">
+            <a href="index.html" class="brand">
+                <img src="App Logo/echo.png" alt="Echo Music Logo" class="app-icon">
+                <span class="copyright">ECHO MUSIC</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link"><i class="fas fa-arrow-left"></i> Gallery</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container contribute-container">
+        <header style="margin-bottom: 3rem;">
+            <h1 style="font-size: 2.5rem; letter-spacing: -1px; margin-bottom: 0.5rem;">Submit a Canvas</h1>
+            <p>Contribute your vertical visualizer directly. It will be validated and automatically merged into the app.</p>
+        </header>
+
+        <section id="login-section" class="step-card auth-card" style="display: none; text-align: center; max-width: 550px; margin: 0 auto;">
+            <i class="fab fa-github" style="font-size: 3.5rem; margin-bottom: 1.5rem;"></i>
+            <h3>Connect to GitHub</h3>
+            <p style="margin-bottom: 2rem;">To submit a canvas, we need to authenticate with your GitHub account. This allows the portal to submit a Pull Request on your behalf, crediting you for your contribution.</p>
+            <button id="login-btn" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                <i class="fab fa-github"></i> Log in with GitHub
+            </button>
+        </section>
+
+        <section id="form-section" class="form-card" style="display: none; max-width: 650px; margin: 0 auto;">
+            <div id="user-profile" class="user-profile-bar">
+                <div class="user-info">
+                    <img id="user-avatar" src="" alt="Avatar" class="avatar-img">
+                    <div>
+                        <span class="signed-in-as">Logged in as</span>
+                        <strong id="user-name" class="username-text"></strong>
+                    </div>
+                </div>
+                <button id="logout-btn" class="btn-text-only" title="Sign Out">
+                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                </button>
+            </div>
+
+            <form id="contrib-form" onsubmit="return false;">
+                <div class="form-group">
+                    <label class="form-label">Submission Category</label>
+                    <div class="segmented-control">
+                        <input type="radio" id="type-song" name="dest-dir" value="Song" checked>
+                        <label for="type-song" class="segment-btn">
+                            <i class="fas fa-music"></i> Song Canvas
+                        </label>
+                        <input type="radio" id="type-album" name="dest-dir" value="Album">
+                        <label for="type-album" class="segment-btn">
+                            <i class="fas fa-compact-disc"></i> Album Canvas
+                        </label>
+                    </div>
+                    <span class="field-desc">Choose "Song Canvas" for single tracks, or "Album Canvas" for entire album loops.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="song-input" class="form-label">Song Title</label>
+                    <input type="text" id="song-input" placeholder="e.g. Lost in Yesterday" autocomplete="off" required maxlength="100">
+                    <span class="field-desc">Enter the exact song name as it appears in music catalogs. No HTML tags allowed.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="artist-input" class="form-label">Artist / Singer</label>
+                    <input type="text" id="artist-input" placeholder="e.g. Tame Impala" autocomplete="off" required maxlength="100">
+                    <span class="field-desc">Enter the primary artist or band name.</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Visualizer Video File</label>
+                    <div id="drop-zone" class="drag-drop-box">
+                        <input type="file" id="file-input" accept="video/mp4,video/quicktime,.mp4,.m3u8" style="display: none;">
+                        <i class="fas fa-cloud-upload-alt drop-icon"></i>
+                        <h4 class="drop-text">Drag & drop video here, or <span class="browse-link">browse files</span></h4>
+                        <p class="drop-subtext">Supports .mp4 or .m3u8 (Max 5MB)</p>
+                    </div>
+                    
+                    <div id="file-info-banner" class="file-details-banner" style="display: none;">
+                        <div class="file-meta">
+                            <i class="fas fa-file-video file-icon"></i>
+                            <div>
+                                <strong id="selected-file-name" class="file-name-text">video.mp4</strong>
+                                <span id="selected-file-size" class="file-size-text">0.00 MB</span>
+                            </div>
+                        </div>
+                        <button type="button" id="remove-file-btn" class="btn-remove-file" title="Remove File">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="validation-container">
+                    <h4 class="validation-title">Technical Requirements Validation</h4>
+                    <div class="validation-list">
+                        <div class="validation-item" id="check-format">
+                            <i class="fas fa-circle-notch fa-spin check-status"></i>
+                            <span>File format must be <code>.mp4</code> or <code>.m3u8</code></span>
+                        </div>
+                        <div class="validation-item" id="check-size">
+                            <i class="fas fa-circle-notch fa-spin check-status"></i>
+                            <span>File size must be equal to or less than <strong>5 MB</strong></span>
+                        </div>
+                        <div class="validation-item" id="check-duration">
+                            <i class="fas fa-circle-notch fa-spin check-status"></i>
+                            <span>Duration must be between <strong>5 and 20 seconds</strong></span>
+                        </div>
+                        <div class="validation-item" id="check-aspect">
+                            <i class="fas fa-circle-notch fa-spin check-status"></i>
+                            <span>Video must be **vertical** (9:16 aspect ratio)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" id="submit-canvas-btn" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 2rem;" disabled>
+                    <i class="fas fa-paper-plane"></i> Submit to GitHub
+                </button>
+            </form>
+        </section>
+
+        <section id="status-section" class="step-card status-card" style="display: none; max-width: 550px; margin: 0 auto; text-align: center;">
+            <div id="status-loader" class="loader" style="margin: 2rem auto;"></div>
+            <div id="status-success-icon" style="display: none; color: var(--accent-secondary); font-size: 4rem; margin: 2rem 0;">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div id="status-error-icon" style="display: none; color: #dc2626; font-size: 4rem; margin: 2rem 0;">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            
+            <h3 id="status-title">Uploading Canvas...</h3>
+            <p id="status-message" style="color: var(--text-dim); margin-bottom: 2rem; line-height: 1.7;">Please hold tight while we configure your fork and create the pull request.</p>
+            
+            <div id="pr-link-container" style="display: none; margin-bottom: 2rem;">
+                <a id="pr-link" href="#" target="_blank" class="btn btn-secondary" style="justify-content: center; width: 100%;">
+                    <i class="fab fa-github"></i> View Pull Request on GitHub
+                </a>
+            </div>
+
+            <button id="status-action-btn" class="btn btn-primary" style="display: none; width: 100%; justify-content: center;">
+                Go Back
+            </button>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>Echo Music Canvas Hub &copy; 2026. Code licensed under GPL-3.0.</p>
+        </div>
+    </footer>
+
+    <video id="validation-video-element" style="display: none;" preload="metadata" muted></video>
+
+    <script src="contribute.js"></script>
+</body>
+
+</html>
